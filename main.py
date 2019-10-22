@@ -13,9 +13,9 @@ def read_frame(path):
         return frame
 
 
-async def blink(canvas, row, column, symbol):
+async def blink(canvas, row, column, symbol, offset_tics):
     while True:
-        for _ in range(random.randint(1, 30)):
+        for _ in range(offset_tics):
             await asyncio.sleep(0)
 
         canvas.addstr(row, column, symbol, curses.A_DIM)
@@ -89,7 +89,7 @@ def draw(canvas):
 
     canvas_size_y, canvas_size_x = canvas.getmaxyx()
 
-    frames = (read_frame('rocket_frames/rocket_frame_1.txt'), read_frame('rocket_frames/rocket_frame_2.txt'))
+    frames = (read_frame('frames/rocket_frame_1.txt'), read_frame('frames/rocket_frame_2.txt'))
     coroutines = []
 
     stars_count = 100
@@ -100,6 +100,7 @@ def draw(canvas):
             random.randint(2, canvas_size_y - 2),
             random.randint(2, canvas_size_x - 2),
             symbol=random.choice('+*.:'),
+            offset_tics=random.randint(1, 30)
         ))
 
     gun_shot = fire(canvas, canvas_size_y//2-1, canvas_size_x//2+2)
@@ -113,9 +114,7 @@ def draw(canvas):
             try:
                 coroutine.send(None)
             except StopIteration:
-                break
-            except RuntimeError:
-                pass
+                coroutines.remove(coroutine)
         canvas.refresh()
         time.sleep(0.1)
 
